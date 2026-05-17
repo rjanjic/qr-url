@@ -1,5 +1,8 @@
 {
-  "name": "qr-url",
+  "name": "@rjanjic/qr-url",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "1.0.0",
   "description": "Tiny zero-dependency QR code generator with SVG output. Pure TypeScript, ESM.",
   "type": "module",
