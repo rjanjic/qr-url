@@ -1,0 +1,8 @@
+*.idea/
+*.vscode/
+*.claude/
+dist/
+node_modules/
+*.log
+*.tsbuildinfo
+*.DS_Store

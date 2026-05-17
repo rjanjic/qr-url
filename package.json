@@ -1,0 +1,48 @@
+{
+  "name": "qr-url",
+  "version": "1.0.0",
+  "description": "Tiny zero-dependency QR code generator with SVG output. Pure TypeScript, ESM.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "pretest": "npm run build",
+    "test": "node --test tests.js",
+    "prepublishOnly": "npm run build && node --test tests.js",
+    "serve": "npm run build && sirv . --port 8765 --dev"
+  },
+  "keywords": [
+    "qr",
+    "qr-code",
+    "qrcode",
+    "svg",
+    "url",
+    "encoder",
+    "tiny",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.4",
+    "sirv-cli": "^3.0.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>URL → QR Code</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      background: #f5f5f7;
+      color: #1c1c1e;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+              max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      letter-spacing: -0.01em;
+    }
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 0.375rem;
+      color: #6e6e73;
+    }
+    .field { margin-bottom: 0.875rem; }
+    input[type="url"], select {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      font-size: 16px;
+      font-family: inherit;
+      color: inherit;
+      background: #fff;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='%236e6e73'><path d='M6 8L0 0h12z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 10px;
+      padding-right: 2rem;
+    }
+    input[type="url"]:focus, select:focus {
+      outline: none;
+      border-color: #0a84ff;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+    }
+    .qr-display {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fafafa;
+      border-radius: 10px;
+      margin-bottom: 0.875rem;
+      overflow: hidden;
+    }
+    .qr-display svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .placeholder {
+      color: #aeaeb2;
+      font-size: 0.875rem;
+      text-align: center;
+      padding: 1rem;
+    }
+    .error {
+      color: #d70015;
+      font-size: 0.875rem;
+      text-align: center;
+      padding: 1rem;
+    }
+    .meta {
+      font-size: 0.75rem;
+      color: #8e8e93;
+      text-align: center;
+      margin: -0.375rem 0 0.875rem;
+      min-height: 1.1em;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    button {
+      flex: 1;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      font-weight: 500;
+      color: inherit;
+      background: #fff;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover { background: #f5f5f7; }
+    button:active { background: #e8e8ea; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #000; color: #f5f5f7; }
+      .card { background: #1c1c1e; box-shadow: none; }
+      label { color: #98989d; }
+      input[type="url"], select, button {
+        background: #2c2c2e;
+        border-color: #3a3a3c;
+      }
+      select { background-color: #2c2c2e; }
+      .qr-display { background: #fff; }
+      .placeholder, .meta { color: #8e8e93; }
+      button:hover { background: #3a3a3c; }
+      button:active { background: #48484a; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>URL → QR Code</h1>
+    <div class="field">
+      <label for="url">URL or text</label>
+      <input type="url" id="url" autofocus placeholder="https://example.com"
+             autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="ec">Error correction</label>
+      <select id="ec">
+        <option value="L">L &middot; 7% recovery</option>
+        <option value="M" selected>M &middot; 15% recovery</option>
+        <option value="Q">Q &middot; 25% recovery</option>
+        <option value="H">H &middot; 30% recovery</option>
+      </select>
+    </div>
+    <div class="qr-display" id="display">
+      <span class="placeholder">Enter a URL above</span>
+    </div>
+    <div class="meta" id="meta"></div>
+    <div class="actions">
+      <button id="download" disabled>Download SVG</button>
+      <button id="copy" disabled>Copy SVG</button>
+    </div>
+  </main>
+  <script type="importmap">
+    { "imports": { "qr-url": "../dist/index.js" } }
+  </script>
+  <script type="module">
+    import { generate, renderSVG } from 'qr-url';
+
+    const $url = document.getElementById('url');
+    const $ec = document.getElementById('ec');
+    const $display = document.getElementById('display');
+    const $meta = document.getElementById('meta');
+    const $download = document.getElementById('download');
+    const $copy = document.getElementById('copy');
+
+    let currentSvg = null;
+    let timer = null;
+
+    function setState(svg, meta) {
+      currentSvg = svg;
+      $meta.textContent = meta || '';
+      $download.disabled = !svg;
+      $copy.disabled = !svg;
+    }
+
+    function render() {
+      const text = $url.value.trim();
+      const ec = $ec.value;
+      if (!text) {
+        $display.innerHTML = '<span class="placeholder">Enter a URL above</span>';
+        setState(null, '');
+        return;
+      }
+      try {
+        const qr = generate(text, ec);
+        const svg = renderSVG(qr);
+        $display.innerHTML = svg;
+        setState(svg, `Version ${qr.version} · ${qr.size}×${qr.size} modules · mask ${qr.mask}`);
+      } catch (e) {
+        $display.innerHTML = `<span class="error">${e.message}</span>`;
+        setState(null, '');
+      }
+    }
+
+    $url.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(render, 80);
+    });
+    $ec.addEventListener('change', render);
+
+    $download.addEventListener('click', () => {
+      if (!currentSvg) return;
+      const blob = new Blob([currentSvg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'qr-code.svg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    $copy.addEventListener('click', async () => {
+      if (!currentSvg) return;
+      const original = $copy.textContent;
+      try {
+        await navigator.clipboard.writeText(currentSvg);
+        $copy.textContent = 'Copied!';
+      } catch {
+        $copy.textContent = 'Copy failed';
+      }
+      setTimeout(() => { $copy.textContent = original; }, 1200);
+    });
+  </script>
+</body>
+</html>
