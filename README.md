@@ -1,4 +1,4 @@
-# qr-url
+# @rjanjic/qr-url
 
 Tiny zero-dependency QR code generator with SVG output. Pure TypeScript, ESM.
 
@@ -11,13 +11,13 @@ Tiny zero-dependency QR code generator with SVG output. Pure TypeScript, ESM.
 ## Install
 
 ```sh
-npm install qr-url
+npm install @rjanjic/qr-url
 ```
 
 ## Usage
 
 ```ts
-import { generate, renderSVG } from 'qr-url';
+import { generate, renderSVG } from '@rjanjic/qr-url';
 
 const qr = generate('https://example.com', 'M');
 // → { modules: Uint8Array, size: 25, version: 2, mask: 2 }
@@ -30,10 +30,10 @@ const svg = renderSVG(qr);
 
 ```html
 <script type="importmap">
-  { "imports": { "qr-url": "https://esm.sh/qr-url" } }
+  { "imports": { "@rjanjic/qr-url": "https://esm.sh/@rjanjic/qr-url" } }
 </script>
 <script type="module">
-  import { generate, renderSVG } from 'qr-url';
+  import { generate, renderSVG } from '@rjanjic/qr-url';
   document.body.innerHTML = renderSVG(generate('https://example.com'));
 </script>
 ```
